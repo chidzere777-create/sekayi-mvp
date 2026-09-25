@@ -11,6 +11,9 @@ const [editingProductId, setEditingProductId] = useState(null)
 
 const [showProductForm, setShowProductForm] = useState(false)
 const [showCart, setShowCart] = useState(false)
+  const [cart, setCart] = useState(() => {
+  return JSON.parse(localStorage.getItem('sekayiCart')) || []
+})
 
 const [savedProducts, setSavedProducts] = useState(() => {
     return JSON.parse(localStorage.getItem('sekayiProducts')) || []
@@ -29,7 +32,7 @@ const [productForm, setProductForm] = useState({
     name: '',
     whatsapp: '',
     location: '',
-    products: '',
+    product: '',
   })
   const products = [
     {
@@ -185,7 +188,7 @@ const [productForm, setProductForm] = useState({
             ) : (
               <p className="empty-state">No products found.</p>
             )}
-          </div>seea
+          </div>
         </section>
       </main>
 
@@ -223,6 +226,40 @@ const [productForm, setProductForm] = useState({
                       <strong>Seller Location:</strong> 📍 {selectedProduct.seller.location}
                         </p>
                         )}
+
+              <button
+  className="cart-button"
+  onClick={() => {
+    const existingItem = cart.find(
+      (item) => item.id === selectedProduct.id
+    )
+
+    let updatedCart
+
+    if (existingItem) {
+      updatedCart = cart.map((item) =>
+        item.id === selectedProduct.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    } else {
+      updatedCart = [
+        ...cart,
+        {
+          ...selectedProduct,
+          quantity: 1
+        }
+      ]
+    }
+
+    setCart(updatedCart)
+    localStorage.setItem('sekayiCart', JSON.stringify(updatedCart))
+
+    alert('Product added to cart!')
+  }}
+>
+  🛒 Add to Cart
+</button>
           
               <button
                 className="contact-button"
@@ -234,7 +271,7 @@ const [productForm, setProductForm] = useState({
                          .replace(/^0/, '263')
                              .replace(/^\+263/, '263')
 
-                  const url = `https://wa.me/${selectedProduct.seller.whatsapp}?text=${encodeURIComponent(message)}`
+                  const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`
                   window.open(url, '_blank')
                 }}
               >
@@ -289,7 +326,7 @@ const [productForm, setProductForm] = useState({
                                                 👤 Seller Dashboard
                                                 </button>
       </nav>
-      {showSellerForm && (
+                                                                                                                                                                                                                !sellerFo    {showSellerForm && (
           <div className="seller-form-overlay">
               <div className="seller-form">
                     <button
@@ -309,7 +346,7 @@ const [productForm, setProductForm] = useState({
                                                                                             onChange={(e) =>
                                                                                                 setSellerForm({ ...sellerForm, name: e.target.value })
                                                                                                   }
-                                                                                                  />
+                                                                                                 />
                                                                                                 
 
                                                                                                       <input
@@ -795,8 +832,81 @@ const [productForm, setProductForm] = useState({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        >
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  Publish Product
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </button>
+             </div>
+           )}
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             </div>
+                      
+ {showCart && (
+  <div className="product-modal">
+    <div className="product-modal-content">
+
+      <button
+        className="close-button"
+        onClick={() => setShowCart(false)}
+      >
+        ✕
+      </button>
+
+      <h2>🛒 My Cart</h2>
+
+      {cart.length === 0 ? (
+        <p>Your cart is empty.</p>
+      ) : (
+        <>
+          {cart.map((item) => (
+            <div className="cart-item" key={item.id}>
+
+              <div className="cart-item-image">
+                {item.image && item.image.startsWith('data:image') ? (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="cart-product-image"
+                  />
+                ) : (
+                  item.image || '📦'
+                )}
+              </div>
+
+              <div className="cart-item-info">
+                <h3>{item.name}</h3>
+                <p>{item.price}</p>
+                <p>Quantity: {item.quantity}</p>
+
+                <button
+                  onClick={() => {
+                    const updatedCart = cart.filter(
+                      (cartItem) => cartItem.id !== item.id
+                    )
+
+                    setCart(updatedCart)
+                    localStorage.setItem(
+                      'sekayiCart',
+                      JSON.stringify(updatedCart)
+                    )
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+
+            </div>
+          ))}
+
+          <button
+            className="contact-button"
+            onClick={() => {
+              alert('Order feature coming soon!')
+            }}
+          >
+            Place Order
+          </button>
+        </>
+      )}
+
+    </div>
+  </div>
+)}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </div>
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              )}                                                                                                                                                                                                      
     </div>
   )
