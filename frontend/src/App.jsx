@@ -36,6 +36,7 @@ const [productForm, setProductForm] = useState({
   })
   const products = [
     {
+      id: 'tomatoes',
       name: 'Fresh Tomatoes',
       details: '1kg • Mbare',
       price: '$2.00',
@@ -48,6 +49,7 @@ const [productForm, setProductForm] = useState({
       }
       },
       {
+      id: 'potatoes',
       name: 'Potatoes',
       details: '1kg • Harare',
       price: '$3.00',
@@ -59,7 +61,8 @@ const [productForm, setProductForm] = useState({
               whatsapp: '263772345678'
     }
     },
-    {
+    { 
+      id: 'sneakers',
       name: 'Casual Sneakers',
       details: 'Harare',
       price: '$25.00',
@@ -871,7 +874,52 @@ const [productForm, setProductForm] = useState({
               <div className="cart-item-info">
                 <h3>{item.name}</h3>
                 <p>{item.price}</p>
-                <p>Quantity: {item.quantity}</p>
+                <div className="quantity-controls">
+  <button
+    onClick={() => {
+      const updatedCart = cart
+        .map((cartItem) =>
+          cartItem.id === item.id
+            ? {
+                ...cartItem,
+                quantity: Math.max(1, cartItem.quantity - 1)
+              }
+            : cartItem
+        )
+
+      setCart(updatedCart)
+      localStorage.setItem(
+        'sekayiCart',
+        JSON.stringify(updatedCart)
+      )
+    }}
+  >
+    −
+  </button>
+
+  <span>{item.quantity}</span>
+
+  <button
+    onClick={() => {
+      const updatedCart = cart.map((cartItem) =>
+        cartItem.id === item.id
+          ? {
+              ...cartItem,
+              quantity: cartItem.quantity + 1
+            }
+          : cartItem
+      )
+
+      setCart(updatedCart)
+      localStorage.setItem(
+        'sekayiCart',
+        JSON.stringify(updatedCart)
+      )
+    }}
+  >
+    +
+  </button>
+</div>
 
                 <button
                   onClick={() => {
@@ -892,6 +940,19 @@ const [productForm, setProductForm] = useState({
 
             </div>
           ))}
+
+          <div className="cart-total">
+  <strong>
+    Total: $
+    {cart.reduce((total, item) => {
+      const price = Number(
+        String(item.price).replace(/[^0-9.]/g, '')
+      )
+
+      return total + price * item.quantity
+    }, 0).toFixed(2)}
+  </strong>
+</div>
 
           <button
             className="contact-button"
