@@ -714,3 +714,298 @@ body,
   text-align: right;
   font-size: 18px;
 }
+
+/* FINAL MVP 1.0 POLISH */
+
+.product-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 14px;
+  display: block;
+}
+
+.product-modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.product-modal-content input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  margin: 7px 0;
+  border: 1px solid #d9dfd8;
+  border-radius: 10px;
+  font-size: 15px;
+  background: white;
+}
+
+.product-modal-content input:focus {
+  outline: none;
+  border-color: #172018;
+}
+
+.close-button {
+  background: #172018;
+  color: white;
+  border: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.close-button:active {
+  transform: scale(0.95);
+}
+
+.sell-button {
+  width: 100%;
+  padding: 13px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 12px;
+  background: #172018;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.sell-button:active {
+  transform: scale(0.98);
+}
+
+.seller-dashboard-button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: 12px;
+  background: #e7ece5;
+  color: #172018;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.seller-dashboard-button:active {
+  transform: scale(0.98);
+}
+
+.seller-profile {
+  background: #f7f8f6;
+  padding: 14px;
+  border-radius: 14px;
+  margin-top: 12px;
+}
+
+.seller-profile p {
+  margin: 7px 0;
+  font-size: 14px;
+}
+
+.quantity-controls button:active {
+  transform: scale(0.95);
+  }
+
+/* PRODUCT CARDS */
+
+.product-card {
+  overflow: hidden;
+}
+
+.product-card .product-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.product-card h3 {
+  margin: 10px 0 5px;
+  font-size: 17px;
+}
+
+.product-card p {
+  margin: 5px 0;
+}
+
+/* MOBILE MODALS & CART */
+
+.product-modal {
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.product-modal-content {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.cart-item {
+  align-items: flex-start;
+}
+
+.cart-item-image {
+  width: 70px;
+  height: 70px;
+}
+
+.cart-product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cart-item-info {
+  min-width: 0;
+}
+
+.cart-item-info h3 {
+  word-break: break-word;
+}
+
+.cart-total {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+/* BOTTOM NAVIGATION */
+
+.bottom-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  overflow-x: auto;
+}
+
+.bottom-nav button {
+  flex-shrink: 0;
+}
+
+.nav-item {
+  min-width: 58px;
+  padding: 7px 5px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #172018;
+  font-size: 18px;
+}
+
+.nav-item span {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+}
+
+.nav-item.active {
+  background: #e7ece5;
+}
+
+.bottom-nav .sell-button {
+  width: auto;
+  margin-top: 0;
+  padding: 9px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.bottom-nav .seller-dashboard-button {
+  width: auto;
+  margin-top: 0;
+  padding: 9px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* SELLER DASHBOARD */
+
+.seller-profile .product-image {
+  width: 100%;
+  max-width: 180px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+  margin: 8px auto;
+}
+
+.seller-profile button {
+  box-sizing: border-box;
+}
+
+.seller-profile h3 {
+  margin: 14px 0 6px;
+  font-size: 17px;
+}
+
+.seller-profile strong {
+  color: #172018;
+}
+
+.seller-profile p {
+  word-break: break-word;
+}
+
+/* RIDER */
+
+.product-modal-content h2 {
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.product-modal-content p {
+  line-height: 1.4;
+}
+
+.product-modal-content .sell-button {
+  margin-top: 12px;
+}
+
+/* SMALL PHONE OPTIMIZATION */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+@media (max-width: 480px) {
+  .product-image {
+    height: 160px;
+  }
+
+  .product-card .product-image {
+    height: 160px;
+  }
+
+  .product-modal-content {
+    padding: 15px;
+  }
+
+  .bottom-nav {
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .nav-item {
+    min-width: 54px;
+  }
+}
