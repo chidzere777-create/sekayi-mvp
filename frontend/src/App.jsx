@@ -11,6 +11,30 @@ const [editingProductId, setEditingProductId] = useState(null)
 
 const [showProductForm, setShowProductForm] = useState(false)
 const [showCart, setShowCart] = useState(false)
+ const [showAccount, setShowAccount] = useState(false)
+  const [showRiderForm, setShowRiderForm] = useState(false)
+
+const [rider, setRider] = useState(() => {
+  return JSON.parse(localStorage.getItem('sekayiRider')) || null
+})
+
+const [riderForm, setRiderForm] = useState({
+  name: '',
+  whatsapp: '',
+  location: '',
+  vehicle: ''
+})
+
+const [buyer, setBuyer] = useState(() => {
+  return JSON.parse(localStorage.getItem('sekayiBuyer')) || null
+})
+
+const [buyerForm, setBuyerForm] = useState({
+  name: '',
+  whatsapp: '',
+  location: ''
+}) 
+
   const [cart, setCart] = useState(() => {
   return JSON.parse(localStorage.getItem('sekayiCart')) || []
 })
@@ -293,11 +317,19 @@ const [productForm, setProductForm] = useState({
         >
           🏪 Sell on Sekayi
         </button>
+        <button
+  className="sell-button"
+  onClick={() => setShowRiderForm(true)}
+>
+  🚴 Rider
+</button>
         <button className="nav-item" 
         onClick={() => setShowCart(true)}>
           🛒<span>Cart</span>
         </button>
-        <button className="nav-item">
+        <button className="nav-item"
+          onClick={() => setShowAccount(true)}
+>
           👤<span>Account</span>
         </button>
         <button
@@ -528,6 +560,10 @@ const [productForm, setProductForm] = useState({
                                                                                                                                                                                                                                                                       .filter((product) => product.seller?.name === seller.name)
                                                                                                                                                                                                                                                                           .length}
                                                                                                                                                                                                                                                                             </p>
+                                                                                                                                                                                                                                                                            <p>
+  <strong>Orders:</strong> 0
+</p>
+                                                                                                                      
                                                                                                                                                                                                                                                                             <h3>My Products</h3>
 
                                                                                                                                                                                                                                                                             {(() => {
@@ -967,7 +1003,215 @@ const [productForm, setProductForm] = useState({
 
     </div>
   </div>
-)}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </div>
+)}       
+
+      {showAccount && (
+  <div className="product-modal">
+    <div className="product-modal-content">
+
+      <button
+        className="close-button"
+        onClick={() => setShowAccount(false)}
+      >
+        ✕
+      </button>
+
+      <h2>👤 My Account</h2>
+
+      {!buyer ? (
+        <>
+          <p>Create your buyer account.</p>
+
+          <input
+            type="text"
+            placeholder="Your name"
+            value={buyerForm.name}
+            onChange={(e) =>
+              setBuyerForm({
+                ...buyerForm,
+                name: e.target.value
+              })
+            }
+          />
+
+          <input
+            type="text"
+            placeholder="WhatsApp number"
+            value={buyerForm.whatsapp}
+            onChange={(e) =>
+              setBuyerForm({
+                ...buyerForm,
+                whatsapp: e.target.value
+              })
+            }
+          />
+
+          <input
+            type="text"
+            placeholder="Your location"
+            value={buyerForm.location}
+            onChange={(e) =>
+              setBuyerForm({
+                ...buyerForm,
+                location: e.target.value
+              })
+            }
+          />
+
+          <button
+            className="sell-button"
+            onClick={() => {
+              if (
+                !buyerForm.name ||
+                !buyerForm.whatsapp ||
+                !buyerForm.location
+              ) {
+                alert('Please complete all fields.')
+                return
+              }
+
+              localStorage.setItem(
+                'sekayiBuyer',
+                JSON.stringify(buyerForm)
+              )
+
+              setBuyer(buyerForm)
+              alert('Account created successfully!')
+            }}
+          >
+            Create Account
+          </button>
+        </>
+      ) : (
+        <>
+          <p><strong>Name:</strong> {buyer.name}</p>
+          <p><strong>WhatsApp:</strong> {buyer.whatsapp}</p>
+          <p><strong>Location:</strong> {buyer.location}</p>
+
+          <button
+  className="sell-button"
+  onClick={() => {
+    setBuyerForm({
+      name: buyer.name,
+      whatsapp: buyer.whatsapp,
+      location: buyer.location
+    })
+
+    setBuyer(null)
+  }}
+>
+  ✏️ Edit Account
+</button>
+        </>
+      )}
+
+    </div>
+  </div>
+)}
+      {showRiderForm && (
+  <div className="product-modal">
+    <div className="product-modal-content">
+
+      <button
+        className="close-button"
+        onClick={() => setShowRiderForm(false)}
+      >
+        ✕
+      </button>
+
+      <h2>🚴 Rider Registration</h2>
+
+      {!rider ? (
+        <>
+          <p>Register as a Sekayi rider.</p>
+
+          <input
+            type="text"
+            placeholder="Your name"
+            value={riderForm.name}
+            onChange={(e) =>
+              setRiderForm({
+                ...riderForm,
+                name: e.target.value
+              })
+            }
+          />
+
+          <input
+            type="text"
+            placeholder="WhatsApp number"
+            value={riderForm.whatsapp}
+            onChange={(e) =>
+              setRiderForm({
+                ...riderForm,
+                whatsapp: e.target.value
+              })
+            }
+          />
+
+          <input
+            type="text"
+            placeholder="Your location"
+            value={riderForm.location}
+            onChange={(e) =>
+              setRiderForm({
+                ...riderForm,
+                location: e.target.value
+              })
+            }
+          />
+
+          <input
+            type="text"
+            placeholder="Vehicle type (e.g. Motorcycle)"
+            value={riderForm.vehicle}
+            onChange={(e) =>
+              setRiderForm({
+                ...riderForm,
+                vehicle: e.target.value
+              })
+            }
+          />
+
+          <button
+            className="sell-button"
+            onClick={() => {
+              if (
+                !riderForm.name ||
+                !riderForm.whatsapp ||
+                !riderForm.location ||
+                !riderForm.vehicle
+              ) {
+                alert('Please complete all fields.')
+                return
+              }
+
+              localStorage.setItem(
+                'sekayiRider',
+                JSON.stringify(riderForm)
+              )
+
+              setRider(riderForm)
+
+              alert('Rider registration successful!')
+            }}
+          >
+            Register as Rider
+          </button>
+        </>
+      ) : (
+        <>
+          <p><strong>Name:</strong> {rider.name}</p>
+          <p><strong>WhatsApp:</strong> {rider.whatsapp}</p>
+          <p><strong>Location:</strong> {rider.location}</p>
+          <p><strong>Vehicle:</strong> {rider.vehicle}</p>
+        </>
+      )}
+
+    </div>
+  </div>
+)}
+    </div>
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              )}                                                                                                                                                                                                      
     </div>
   )
