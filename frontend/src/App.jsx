@@ -1205,15 +1205,29 @@ const [productForm, setProductForm] = useState({
           <p><strong>WhatsApp:</strong> {rider.whatsapp}</p>
           <p><strong>Location:</strong> {rider.location}</p>
           <p><strong>Vehicle:</strong> {rider.vehicle}</p>
+          <button
+  className="sell-button"
+  onClick={() => {
+    setRiderForm({
+      name: rider.name,
+      whatsapp: rider.whatsapp,
+      location: rider.location,
+      vehicle: rider.vehicle
+    })
+
+    setRider(null)
+    localStorage.removeItem('sekayiRider')
+  }}
+>
+  ✏️ Edit Rider Details
+</button>
         </>
       )}
 
     </div>
   </div>
 )}
-    </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             )}                                                                                                                                                                                                      
-    </div>
+    </div>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
   )
 }
 
