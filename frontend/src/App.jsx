@@ -120,7 +120,7 @@ const [productForm, setProductForm] = useState({
           
             <p className="tagline">Simple • Local • Trusted</p>
           </div>
-        </div>
+      
 
         <button className="menu" aria-label="Menu">
           ☰
