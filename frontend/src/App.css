@@ -102,7 +102,13 @@
                                                                                                         border: 0;
                                                                                                           outline: 0;
                                                                                                             font-size: 15px;
+                                                                                                      background: white;
+                                                                                                      color: #172018;
                                                                                                             }
+                                                                                                           .search input::placeholder {
+                                                                                                             color: #7a8179;
+                                                                                                           } 
+
 
                                                                                                             .categories,
                                                                                                             .popular {
@@ -894,7 +900,7 @@ body,
   border: 0;
   border-radius: 10px;
   background: transparent;
-  color: #172018;
+  color: white;
   font-size: 18px;
 }
 
