@@ -117,7 +117,7 @@ const [productForm, setProductForm] = useState({
       <header className="header">
         <div className="logo">
           <img className="bear" src={`${import.meta.env.BASE_URL}sekayi-logo.png`} alt="Sekayi" />
-          </div>
+          
             <p className="tagline">Simple • Local • Trusted</p>
           </div>
         </div>
