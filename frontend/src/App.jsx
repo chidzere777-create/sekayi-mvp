@@ -198,7 +198,7 @@ const [productForm, setProductForm] = useState({
                                                 ) : (
                                                     product.image || '📦'
                                                       )}
-                  )
+                  
                   </div>
                   <h4>{product.name}</h4>
                   <p>{product.details}</p>
@@ -361,7 +361,7 @@ const [productForm, setProductForm] = useState({
                                                 👤 Seller Dashboard
                                                 </button>
       </nav>
-                                                                                                                                                                                                                !sellerFo    {showSellerForm && (
+               {showSellerForm && (
           <div className="seller-form-overlay">
               <div className="seller-form">
                     <button
