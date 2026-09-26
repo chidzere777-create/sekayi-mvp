@@ -991,13 +991,13 @@ const [productForm, setProductForm] = useState({
 </div>
 
           <button
-            className="contact-button"
-            onClick={() => {
-              alert('Order feature coming soon!')
-            }}
-          >
-            Place Order
-          </button>
+  className="contact-button"
+  onClick={() => {
+    setShowRiderForm(true)
+  }}
+>
+  🛵 Find a Rider
+</button>
         </>
       )}
 
