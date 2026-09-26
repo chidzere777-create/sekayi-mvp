@@ -872,8 +872,8 @@ const [productForm, setProductForm] = useState({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  Publish Product
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </button>
              </div>
-           )}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           </div>
+          </div>
+      )}
                       
  {showCart && (
   <div className="product-modal">
