@@ -1018,4 +1018,23 @@ input {
   .nav-item {
     min-width: 54px;
   }
+
+  .product {
+  overflow: hidden;
+}
+
+.product .product-image {
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.product .marketplace-product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 }
