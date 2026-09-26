@@ -1002,7 +1002,8 @@ input {
 
   .bottom-nav {
     gap: 4px;
-    padding: 6px;
+    padding: 6px 4px;
+    background: white;
   }
 
   .nav-item {
