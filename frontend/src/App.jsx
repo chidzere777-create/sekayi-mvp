@@ -1235,15 +1235,6 @@ const [productForm, setProductForm] = useState({
   </>
 )}
 
-    setRider(null)
-    localStorage.removeItem('sekayiRider')
-  }}
->
-  ✏️ Edit Rider Details
-</button>
-        </>
-      )}
-
     </div>
   </div>
 )}
