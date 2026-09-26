@@ -14,8 +14,8 @@ const [showCart, setShowCart] = useState(false)
  const [showAccount, setShowAccount] = useState(false)
   const [showRiderForm, setShowRiderForm] = useState(false)
 
-const [rider, setRider] = useState(() => {
-  return JSON.parse(localStorage.getItem('sekayiRider')) || null
+const [riders, setRiders] = useState(() => {
+  return JSON.parse(localStorage.getItem('sekayiRiders')) || []
 })
 
 const [riderForm, setRiderForm] = useState({
@@ -1121,7 +1121,7 @@ const [productForm, setProductForm] = useState({
 
       <h2>🚴 Rider Registration</h2>
 
-      {!rider ? (
+      {riders.length === 0 ? (
         <>
           <p>Register as a Sekayi rider.</p>
 
@@ -1186,12 +1186,14 @@ const [productForm, setProductForm] = useState({
                 return
               }
 
+              const newRiders = [...riders, riderForm]
+
               localStorage.setItem(
-                'sekayiRider',
-                JSON.stringify(riderForm)
+                'sekayiRiders',
+                JSON.stringify(newRiders)
               )
 
-              setRider(riderForm)
+              setRiders(newRiders)
 
               alert('Rider registration successful!')
             }}
@@ -1200,20 +1202,38 @@ const [productForm, setProductForm] = useState({
           </button>
         </>
       ) : (
-        <>
-          <p><strong>Name:</strong> {rider.name}</p>
-          <p><strong>WhatsApp:</strong> {rider.whatsapp}</p>
-          <p><strong>Location:</strong> {rider.location}</p>
-          <p><strong>Vehicle:</strong> {rider.vehicle}</p>
-          <button
-  className="sell-button"
-  onClick={() => {
-    setRiderForm({
-      name: rider.name,
-      whatsapp: rider.whatsapp,
-      location: rider.location,
-      vehicle: rider.vehicle
-    })
+  <>
+    <h3>🛵 Registered Riders</h3>
+
+    {riders.map((rider, index) => (
+      <div className="seller-profile" key={index}>
+        <p><strong>Name:</strong> {rider.name}</p>
+        <p><strong>📍 Location:</strong> {rider.location}</p>
+        <p><strong>🚗 Vehicle:</strong> {rider.vehicle}</p>
+
+        <button
+          className="sell-button"
+          onClick={() => {
+            let whatsapp = rider.whatsapp
+              .replace(/\s/g, '')
+              .replace(/^0/, '263')
+              .replace(/^\+263/, '263')
+
+            const message =
+              'Hello, I found you on Sekayi. I would like to arrange a delivery.'
+
+            window.open(
+              `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`,
+              '_blank'
+            )
+          }}
+        >
+          📱 Contact Rider
+        </button>
+      </div>
+    ))}
+  </>
+)}
 
     setRider(null)
     localStorage.removeItem('sekayiRider')
