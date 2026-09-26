@@ -1049,7 +1049,7 @@ input {
   /* CART BUTTON TEXT VISIBILITY */
 .cart-button,
 .cart-button span {
-  color: white !important;
+  color: black !important;
   background: #172018;
 }
 }
