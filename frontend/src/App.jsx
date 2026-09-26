@@ -321,7 +321,7 @@ const [productForm, setProductForm] = useState({
   className="sell-button"
   onClick={() => setShowRiderForm(true)}
 >
-  🚴 Rider
+  🚴 Register as a Rider
 </button>
         <button className="nav-item" 
         onClick={() => setShowCart(true)}>
