@@ -1045,4 +1045,11 @@ input {
 .product-modal-content input::placeholder {
   color: #7a8179;
 }
+
+  /* CART BUTTON TEXT VISIBILITY */
+.cart-button,
+.cart-button span {
+  color: white !important;
+  background: #172018;
+}
 }
