@@ -395,7 +395,7 @@
   color: white;
   border: 0;
   border-radius: 10px;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: bold;
   cursor: pointer;
   text-align: center;
@@ -792,7 +792,7 @@ body,
   border: 0;
   border-radius: 12px;
   background: #e7ece5;
-  color: #172018;
+  color: white;
   font-size: 14px;
   font-weight: bold;
 }
@@ -927,6 +927,7 @@ body,
 .bottom-nav .seller-dashboard-button {
   width: auto;
   margin-top: 0;
+  colour: white;
   padding: 9px 10px;
   font-size: 12px;
   white-space: nowrap;
@@ -1051,5 +1052,10 @@ input {
 .cart-button span {
   color: black !important;
   background: #172018;
+}
+
+  /* SELLER DASHBOARD TEXT VISIBILITY */
+.seller-dashboard-button {
+  color: white !important;
 }
 }
