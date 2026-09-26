@@ -1018,4 +1018,31 @@ input {
   .nav-item {
     min-width: 54px;
   }
+
+  /* FINAL MARKETPLACE CARD SIZE */
+.product {
+  padding: 8px;
+}
+
+.product .product-image {
+  height: 100px;
+  overflow: hidden;
+}
+
+.product .marketplace-product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+  /* FORM INPUT TEXT */
+.product-modal-content input {
+  color: #172018;
+  background: white;
+  caret-color: #172018;
+}
+
+.product-modal-content input::placeholder {
+  color: #7a8179;
+}
 }
