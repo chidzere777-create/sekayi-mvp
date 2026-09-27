@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Sekayi MVP"
+description = "Imported Vite and React frontend for the Sekayi MVP product, including its branded interface, local assets, and project documentation."
+version = "1.0.0"
+id = "artifacts/sekayi-mvp"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24723
+
+[services.development]
+run = "pnpm --filter @workspace/sekayi-mvp run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/sekayi-mvp", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/sekayi-mvp/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24723"
+BASE_PATH = "/"
