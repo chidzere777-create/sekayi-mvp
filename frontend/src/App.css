@@ -1058,4 +1058,11 @@ input {
 .seller-dashboard-button {
   color: white !important;
 }
+  /* CLOSE BUTTON VISIBILITY */
+.form-close,
+.close-button,
+.modal-close {
+  color: #000000 !important;
+  background: transparent !important;
+}
 }
