@@ -130,7 +130,7 @@ const [productForm, setProductForm] = useState({
       <main>
         <section className="hero">
           <h2>
-            Buy Local - Sell Local 
+            Buy & Sell Local 
           </h2>
           <p>Discover products from sellers around Zimbabwe.</p>
 
@@ -677,7 +677,7 @@ const [productForm, setProductForm] = useState({
                            className="form-close"
                                    onClick={() => setShowProductForm(false)}
                                          >
-                                                 ✕
+                                                 ✕gg
                                                        </button>
 
                                                              <h2>Add Product</h2>
@@ -707,17 +707,23 @@ const [productForm, setProductForm] = useState({
                                                                                                                                                                                                                                                              }
                                                                                                                                                                                                                                                                    />
 
-                                                                                                                                                                                                                                                                         <input
-                                                                                                                                                                                                                                                                                 type="text"
-                                                                                                                                                                                                                                                                                         placeholder="Category (e.g. Fashion)"
-                                                                                                                                                                                                                                                                                                 value={productForm.category}
-                                                                                                                                                                                                                                                                                                         onChange={(e) =>
-                                                                                                                                                                                                                                                                                                                   setProductForm({
-                                                                                                                                                                                                                                                                                                                               ...productForm,
-                                                                                                                                                                                                                                                                                                                                           category: e.target.value
-                                                                                                                                                                                                                                                                                                                                                     })
-                                                                                                                                                                                                                                                                                                                                                             }
-                                                                                                                                                                                                                                                                                                                                                                   />
+                                                                                                                                                                                                                                                                         <select
+  value={productForm.category}
+  onChange={(e) =>
+    setProductForm({
+      ...productForm,
+      category: e.target.value
+    })
+  }
+>
+  <option value="">Select Category</option>
+  <option value="Groceries">Groceries</option>
+  <option value="Food">Food</option>
+  <option value="Electronics">Electronics</option>
+  <option value="Fashion">Fashion</option>
+  <option value="Home">Home</option>
+  <option value="Other">Other</option>
+</select>
 
                                                                                                                                                                                                                                                                                                                                                                          <input
                                                                                                                                                                                                                                                                                                                                                                                  type="text"
