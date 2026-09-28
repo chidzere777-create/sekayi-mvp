@@ -682,7 +682,7 @@ body,
   border: 0;
   border-radius: 12px;
   background: #172018;
-  color: white;
+  color: #ffffff !important;
   font-size: 15px;
   font-weight: bold;
 }
@@ -1064,5 +1064,20 @@ input {
 .modal-close {
   color: #000000 !important;
   background: transparent !important;
+}
+  .place-order-button {
+  width: 100%;
+  padding: 13px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 12px;
+  background: #172018 !important;
+  color: #ffffff !important;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.place-order-button:active {
+  transform: scale(0.98);
 }
 }

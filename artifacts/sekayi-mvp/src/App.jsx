@@ -14,6 +14,7 @@ const [showProductForm, setShowProductForm] = useState(false)
 const [showCart, setShowCart] = useState(false)
  const [showAccount, setShowAccount] = useState(false)
   const [showRiderForm, setShowRiderForm] = useState(false)
+  const [showRiderList, setShowRiderList] = useState(false)
 const [apiError, setApiError] = useState('')
 const [isLoadingProducts, setIsLoadingProducts] = useState(true)
 
@@ -202,12 +203,12 @@ const [productForm, setProductForm] = useState({
                   </div>
                   <h4>{product.name}</h4>
                   <p>{product.details}</p>
-                  <strong>{product.price}</strong>
-                  {selectedProduct && selectedProduct.seller && (
+                  <strong>${Number(product.price).toFixed(2)}</strong>
+                  {product && product.seller && (
                     <div className="seller-info">
                       <h3>Seller</h3>
-                        <p><strong>{selectedProduct.seller.name}</strong></p>
-                          <p>📍 {selectedProduct.seller.location}</p>
+                        <p><strong>{product.seller.name}</strong></p>
+                          <p>📍 {product.seller.location}</p>
                           </div>
                     )}
                 </div>
@@ -242,7 +243,7 @@ const [productForm, setProductForm] = useState({
                 </div>
               <h2>{selectedProduct.name}</h2>
               <p>{selectedProduct.details}</p>
-              <strong>{selectedProduct.price}</strong>
+              <strong>${Number(selectedProduct.price).toFixed(2)}</strong>
               {selectedProduct.seller && (
                   <p>
                       <strong>Seller:</strong> {selectedProduct.seller.name}
@@ -255,7 +256,7 @@ const [productForm, setProductForm] = useState({
                         )}
 
               <button
-  className="cart-button"
+  className="place-order-button"
  onClick={async () => {
  if (!buyer?.id) {
  alert('Please create a buyer account before adding items to your cart.')
@@ -620,7 +621,7 @@ const [productForm, setProductForm] = useState({
                            className="form-close"
                                    onClick={() => setShowProductForm(false)}
                                          >
-                                                 ✕gg
+                                                 ✕
                                                        </button>
 
                                                              <h2>Add Product</h2>
@@ -903,13 +904,13 @@ const [productForm, setProductForm] = useState({
           <button
   className="contact-button"
   onClick={() => {
-    setShowRiderForm(true)
+    setShowRiderList(true)
   }}
 >
   🛵 Find a Rider
 </button>
           <button
-            className="cart-button"
+  className="place-order-button"
             onClick={async () => {
               if (!buyer?.id) {
                 alert('Please create a buyer account before placing an order.')
@@ -1038,6 +1039,69 @@ const [productForm, setProductForm] = useState({
 >
   ✏️ Edit Account
 </button>
+        </>
+      )}
+
+    </div>
+  </div>
+)}
+    {showRiderList && (
+  <div className="product-modal">
+    <div className="product-modal-content">
+
+      <button
+        className="close-button"
+        onClick={() => setShowRiderList(false)}
+      >
+        ✕
+      </button>
+
+      <h2>🛵 Find a Rider</h2>
+
+      {riders.length === 0 ? (
+    <>
+        <p>No riders available.</p>
+    <button
+  className="sell-button"
+  onClick={() => {
+    setShowRiderList(false)
+    setShowRiderForm(true)
+  }}
+>
+  🚴 Register as Rider
+</button>
+    </>
+      ) : (
+        <>
+          <h3>Available Riders</h3>
+
+          {riders.map((rider, index) => (
+            <div className="seller-profile" key={index}>
+              <p><strong>Name:</strong> {rider.name}</p>
+              <p><strong>📍 Location:</strong> {rider.location}</p>
+              <p><strong>🚗Vehicle:</strong> {rider.vehicle}</p>
+
+              <button
+                className="sell-button"
+                onClick={() => {
+                  let whatsapp = rider.whatsapp
+                    .replace(/\s/g, '')
+                    .replace(/^0/, '263')
+                    .replace(/^\+263/, '263')
+
+                  const message =
+                    'Hello, I found you on Sekayi. I would like to arrange a delivery.'
+
+                  window.open(
+                    `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`,
+                    '_blank'
+                  )
+                }}
+              >
+                📱 Contact Rider
+              </button>
+            </div>
+          ))}
         </>
       )}
 
