@@ -6,43 +6,7 @@ function App() {
   const [category, setCategory] = useState('All')
   const [selectedProduct, setSelectedProduct] = useState(null)
 
-  const products = [
-    {
-      name: 'Fresh Tomatoes',
-      details: '1kg • Mbare',
-      price: '$2.00',
-      image: '🍅',
-      category: 'Groceries',
-      seller: {
-            name: 'Mbare Fresh Produce',
-                location: 'Mbare, Harare'
-      }
-    },
-    {
-      name: 'Potatoes',
-      details: '1kg • Harare',
-      price: '$3.00',
-      image: '🥔',
-      category: 'Groceries',
-    seller: {
-          name: 'Harare Farm Supplies',
-              location: 'Harare'
-    }
-    },
-    {
-      name: 'Casual Sneakers',
-      details: 'Harare',
-      price: '$25.00',
-      image: '👟',
-      category: 'Fashion',
-      seller: {
-            name: 'Urban Footwear',
-                location: 'Harare'
-                  }
-      }
-    
-  ]
-
+  
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
