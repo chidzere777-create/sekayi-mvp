@@ -10,6 +10,16 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: sellers
+    description: Seller registration and seller operations
+  - name: buyers
+    description: Buyer registration and buyer operations
+  - name: products
+    description: Marketplace product operations
+  - name: carts
+    description: Buyer cart operations
+  - name: orders
+    description: Marketplace order operations
 paths:
   /healthz:
     get:
@@ -24,7 +34,403 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /sellers:
+    post:
+      operationId: createSeller
+      tags: [sellers]
+      summary: Register a seller
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SellerInput"
+      responses:
+        "201":
+          description: Seller created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Seller"
+  /sellers/{sellerId}:
+    get:
+      operationId: getSeller
+      tags: [sellers]
+      summary: Get a seller
+      parameters:
+        - $ref: "#/components/parameters/SellerId"
+      responses:
+        "200":
+          description: Seller
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Seller"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateSeller
+      tags: [sellers]
+      summary: Update seller information
+      parameters:
+        - $ref: "#/components/parameters/SellerId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SellerUpdate"
+      responses:
+        "200":
+          description: Updated seller
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Seller"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /sellers/{sellerId}/orders:
+    get:
+      operationId: listSellerOrders
+      tags: [sellers, orders]
+      summary: List orders containing a seller's products
+      parameters:
+        - $ref: "#/components/parameters/SellerId"
+      responses:
+        "200":
+          description: Seller orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+  /sellers/{sellerId}/orders/count:
+    get:
+      operationId: getSellerOrderCount
+      tags: [sellers, orders]
+      summary: Count orders containing a seller's products
+      parameters:
+        - $ref: "#/components/parameters/SellerId"
+      responses:
+        "200":
+          description: Seller order count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderCount"
+  /buyers:
+    post:
+      operationId: createBuyer
+      tags: [buyers]
+      summary: Register a buyer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BuyerInput"
+      responses:
+        "201":
+          description: Buyer created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Buyer"
+  /buyers/{buyerId}:
+    get:
+      operationId: getBuyer
+      tags: [buyers]
+      summary: Get a buyer
+      parameters:
+        - $ref: "#/components/parameters/BuyerId"
+      responses:
+        "200":
+          description: Buyer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Buyer"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List marketplace products
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: category
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Marketplace products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+  /products/{productId}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "204":
+          description: Product deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /buyers/{buyerId}/cart:
+    get:
+      operationId: getCart
+      tags: [carts]
+      summary: Get or create a buyer's open cart
+      parameters:
+        - $ref: "#/components/parameters/BuyerId"
+      responses:
+        "200":
+          description: Open cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+    post:
+      operationId: createCart
+      tags: [carts]
+      summary: Create an open cart for a buyer
+      parameters:
+        - $ref: "#/components/parameters/BuyerId"
+      responses:
+        "201":
+          description: Open cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+  /buyers/{buyerId}/cart/items:
+    post:
+      operationId: addCartItem
+      tags: [carts]
+      summary: Add a product to a buyer's cart
+      parameters:
+        - $ref: "#/components/parameters/BuyerId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartItemInput"
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+  /buyers/{buyerId}/cart/items/{productId}:
+    patch:
+      operationId: updateCartItem
+      tags: [carts]
+      summary: Update a cart item quantity
+      parameters:
+        - $ref: "#/components/parameters/BuyerId"
+        - $ref: "#/components/parameters/ProductId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartItemUpdate"
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+    delete:
+      operationId: removeCartItem
+      tags: [carts]
+      summary: Remove a product from a buyer's cart
+      parameters:
+        - $ref: "#/components/parameters/BuyerId"
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+  /buyers/{buyerId}/orders:
+    get:
+      operationId: listBuyerOrders
+      tags: [buyers, orders]
+      summary: List a buyer's orders
+      parameters:
+        - $ref: "#/components/parameters/BuyerId"
+      responses:
+        "200":
+          description: Buyer orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      operationId: createOrder
+      tags: [buyers, orders]
+      summary: Create an order from the buyer's open cart
+      parameters:
+        - $ref: "#/components/parameters/BuyerId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get an order
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /orders/{orderId}/status:
+    patch:
+      operationId: updateOrderStatus
+      tags: [orders]
+      summary: Update an order status
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderStatusInput"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
 components:
+  parameters:
+    SellerId:
+      in: path
+      name: sellerId
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    BuyerId:
+      in: path
+      name: buyerId
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    ProductId:
+      in: path
+      name: productId
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    OrderId:
+      in: path
+      name: orderId
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +439,303 @@ components:
           type: string
       required:
         - status
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    Seller:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        whatsapp:
+          type: string
+        location:
+          type: string
+        product:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        orderCount:
+          type: integer
+      required: [id, name, whatsapp, location, product, createdAt, updatedAt, orderCount]
+    SellerInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        whatsapp:
+          type: string
+          minLength: 1
+        location:
+          type: string
+          minLength: 1
+        product:
+          type: string
+          minLength: 1
+      required: [name, whatsapp, location, product]
+    SellerUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        whatsapp:
+          type: string
+          minLength: 1
+        location:
+          type: string
+          minLength: 1
+        product:
+          type: string
+          minLength: 1
+    Buyer:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        whatsapp:
+          type: string
+        location:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, whatsapp, location, createdAt]
+    BuyerInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        whatsapp:
+          type: string
+          minLength: 1
+        location:
+          type: string
+          minLength: 1
+      required: [name, whatsapp, location]
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        details:
+          type: string
+        price:
+          type: number
+          format: double
+        category:
+          type: string
+        description:
+          type: string
+        location:
+          type: string
+        image:
+          type: string
+        seller:
+          $ref: "#/components/schemas/SellerSummary"
+        sellerId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, name, details, price, category, description, location, image, seller, sellerId, createdAt, updatedAt]
+    SellerSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        whatsapp:
+          type: string
+        location:
+          type: string
+      required: [id, name, whatsapp, location]
+    ProductInput:
+      type: object
+      properties:
+        sellerId:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+          minLength: 1
+        details:
+          type: string
+        price:
+          type: number
+          minimum: 0
+        category:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        location:
+          type: string
+        image:
+          type: string
+      required: [sellerId, name, details, price, category, description, location, image]
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        details:
+          type: string
+        price:
+          type: number
+          minimum: 0
+        category:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        location:
+          type: string
+        image:
+          type: string
+    Cart:
+      type: object
+      properties:
+        id:
+          type: integer
+        buyerId:
+          type: integer
+        status:
+          type: string
+          enum: [open, checked_out]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItem"
+        total:
+          type: number
+          format: double
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, buyerId, status, items, total, createdAt, updatedAt]
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        quantity:
+          type: integer
+          minimum: 1
+        product:
+          $ref: "#/components/schemas/Product"
+        subtotal:
+          type: number
+          format: double
+      required: [id, productId, quantity, product, subtotal]
+    CartItemInput:
+      type: object
+      properties:
+        productId:
+          type: integer
+          minimum: 1
+        quantity:
+          type: integer
+          minimum: 1
+      required: [productId, quantity]
+    CartItemUpdate:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+      required: [quantity]
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        buyerId:
+          type: integer
+        status:
+          type: string
+          enum: [pending, confirmed, preparing, out_for_delivery, delivered, cancelled]
+        total:
+          type: number
+          format: double
+        deliveryLocation:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, buyerId, status, total, deliveryLocation, items, createdAt, updatedAt]
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        sellerId:
+          type: integer
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+          format: double
+        subtotal:
+          type: number
+          format: double
+        productName:
+          type: string
+        sellerName:
+          type: string
+      required: [id, productId, sellerId, quantity, unitPrice, subtotal, productName, sellerName]
+    OrderInput:
+      type: object
+      properties:
+        deliveryLocation:
+          type: string
+    OrderStatusInput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, preparing, out_for_delivery, delivered, cancelled]
+      required: [status]
+    OrderCount:
+      type: object
+      properties:
+        sellerId:
+          type: integer
+        count:
+          type: integer
+      required: [sellerId, count]
 

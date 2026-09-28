@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
+import { cartItemsFromResponse, marketplaceApi } from './api.js'
 
 function App() {
   const [search, setSearch] = useState('')
@@ -13,6 +14,8 @@ const [showProductForm, setShowProductForm] = useState(false)
 const [showCart, setShowCart] = useState(false)
  const [showAccount, setShowAccount] = useState(false)
   const [showRiderForm, setShowRiderForm] = useState(false)
+const [apiError, setApiError] = useState('')
+const [isLoadingProducts, setIsLoadingProducts] = useState(true)
 
 const [riders, setRiders] = useState(() => {
   return JSON.parse(localStorage.getItem('sekayiRiders')) || []
@@ -36,12 +39,16 @@ const [buyerForm, setBuyerForm] = useState({
 }) 
 
   const [cart, setCart] = useState(() => {
-  return JSON.parse(localStorage.getItem('sekayiCart')) || []
+ return []
 })
 
 const [savedProducts, setSavedProducts] = useState(() => {
-    return JSON.parse(localStorage.getItem('sekayiProducts')) || []
+ return []
     })
+const [seller, setSeller] = useState(() => {
+ return JSON.parse(localStorage.getItem('sekayiSeller')) || null
+})
+const [sellerOrderCount, setSellerOrderCount] = useState(0)
 
 const [productForm, setProductForm] = useState({
   name: '',
@@ -58,50 +65,43 @@ const [productForm, setProductForm] = useState({
     location: '',
     product: '',
   })
-  const products = [
-    {
-      id: 'tomatoes',
-      name: 'Fresh Tomatoes',
-      details: '1kg • Mbare',
-      price: '$2.00',
-      image: '🍅',
-      category: 'Groceries',
-      seller: {
-            name: 'Mbare Fresh Produce',
-            location: 'Mbare, Harare',
-                whatsapp: '263771234567'
-      }
-      },
-      {
-      id: 'potatoes',
-      name: 'Potatoes',
-      details: '1kg • Harare',
-      price: '$3.00',
-      image: '🥔',
-      category: 'Groceries',
-    seller: {
-          name: 'Harare Farm Supplies',
-          location: 'Harare',
-              whatsapp: '263772345678'
-    }
-    },
-    { 
-      id: 'sneakers',
-      name: 'Casual Sneakers',
-      details: 'Harare',
-      price: '$25.00',
-      image: '👟',
-      category: 'Fashion',
-      seller: {
-            name: 'Urban Footwear',
-            location: 'Harare',
-                whatsapp: '263773456789'
-                  }
-      }
-    
-  ]
+ const products = savedProducts
 
-  const filteredProducts = [...products, ...savedProducts].filter((product) => {
+ useEffect(() => {
+   let active = true
+   marketplaceApi
+     .listProducts()
+     .then((items) => {
+       if (active) setSavedProducts(items)
+     })
+     .catch((error) => {
+       if (active) setApiError(error.message)
+     })
+     .finally(() => {
+       if (active) setIsLoadingProducts(false)
+     })
+   return () => {
+     active = false
+   }
+ }, [])
+
+ useEffect(() => {
+   if (!buyer?.id) return
+   marketplaceApi
+     .getCart(buyer.id)
+     .then((nextCart) => setCart(cartItemsFromResponse(nextCart)))
+     .catch((error) => setApiError(error.message))
+ }, [buyer?.id])
+
+ useEffect(() => {
+   if (!seller?.id) return
+   marketplaceApi
+     .getSellerOrderCount(seller.id)
+     .then((result) => setSellerOrderCount(result.count))
+     .catch((error) => setApiError(error.message))
+ }, [seller?.id])
+
+ const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
       .includes(search.toLowerCase())
@@ -186,7 +186,7 @@ const [productForm, setProductForm] = useState({
           <div className="products">
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
-                <div className="product" key={product.name}
+                 <div className="product" key={product.id}
                 onClick={() => setSelectedProduct(product)}
                   >
                   <div className="product-image">{product.image&& product.image.startsWith('data:image') ? (
@@ -256,34 +256,24 @@ const [productForm, setProductForm] = useState({
 
               <button
   className="cart-button"
-  onClick={() => {
-    const existingItem = cart.find(
-      (item) => item.id === selectedProduct.id
-    )
+ onClick={async () => {
+ if (!buyer?.id) {
+ alert('Please create a buyer account before adding items to your cart.')
+ setShowAccount(true)
+ return
+ }
 
-    let updatedCart
-
-    if (existingItem) {
-      updatedCart = cart.map((item) =>
-        item.id === selectedProduct.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-    } else {
-      updatedCart = [
-        ...cart,
-        {
-          ...selectedProduct,
-          quantity: 1
-        }
-      ]
-    }
-
-    setCart(updatedCart)
-    localStorage.setItem('sekayiCart', JSON.stringify(updatedCart))
-
-    alert('Product added to cart!')
-  }}
+ try {
+   const nextCart = await marketplaceApi.addCartItem(buyer.id, {
+     productId: Number(selectedProduct.id),
+     quantity: 1
+   })
+   setCart(cartItemsFromResponse(nextCart))
+   alert('Product added to cart!')
+ } catch (error) {
+   alert(error.message)
+ }
+ }}
 >
   🛒 Add to Cart
 </button>
@@ -335,9 +325,7 @@ const [productForm, setProductForm] = useState({
         <button
           className="seller-dashboard-button"
             onClick={() => {
-                  const savedSeller = localStorage.getItem('sekayiSeller')
-
-                      if (!savedSeller) {
+ if (!seller?.id) {
                             alert('Please register as a seller first.')
                                   return
                                       }
@@ -437,7 +425,7 @@ const [productForm, setProductForm] = useState({
 
                                                                                                                                                                                           <button
                                                                                                                                                                                               className="register-button"
-                                                                                                                                                                                              onClick={() => {
+ onClick={async () => {
                                                                                                                                                                                                   if (
                                                                                                                                                                                                         !sellerForm.name ||
                                                                                                                                                                                                               !sellerForm.whatsapp ||
@@ -448,21 +436,21 @@ const [productForm, setProductForm] = useState({
                                                                                                                                                                                                                                           return
                                                                                                                                                                                                                                               }
 
-                                                                                                                                                                                                                                                  localStorage.setItem(
-                                                                                                                                                                                                                                                        'sekayiSeller',
-                                                                                                                                                                                                                                                              JSON.stringify(sellerForm)
-                                                                                                                                                                                                                                                                  )
-
-                                                                                                                                                                                                                                                                      alert('Seller registration successful!')
-
-                                                                                                                                                                                                                                                                          setSellerForm({
-                                                                                                                                                                                                                                                                                name: '',
-                                                                                                                                                                                                                                                                                      whatsapp: '',
-                                                                                                                                                                                                                                                                                            location: '',
-                                                                                                                                                                                                                                                                                                  product: ''
-                                                                                                                                                                                                                                                                                                      })
-
-                                                                                                                                                                                                                                                                                                          setShowSellerForm(false)
+ try {
+   const createdSeller = await marketplaceApi.createSeller(sellerForm)
+   localStorage.setItem('sekayiSeller', JSON.stringify(createdSeller))
+   setSeller(createdSeller)
+   alert('Seller registration successful!')
+   setSellerForm({
+     name: '',
+     whatsapp: '',
+     location: '',
+     product: ''
+   })
+   setShowSellerForm(false)
+ } catch (error) {
+   alert(error.message)
+ }
                                                                                                                                                                                                                                                                                                             }}
                                                                                                                                                                                                                                                                                                             >
                                                                                                                                                                                                   Register as Seller
@@ -485,12 +473,7 @@ const [productForm, setProductForm] = useState({
                                                             <h2>Seller Dashboard</h2>
                                                                   <p>Welcome to Sekayi!</p>
 
-                                                                        {(() => {
-                                                                                const seller = JSON.parse(
-                                                                                    localStorage.getItem('sekayiSeller')
-                                                                                      ) || {}
-
-                                                                                                          return (
+ {seller && (
                                                                                                                     <div className="seller-profile">
                                                                                                                                 <p>
                                                                                                                                               <strong>Business:</strong> {seller.name}
@@ -509,45 +492,17 @@ const [productForm, setProductForm] = useState({
                                                                                                                                                                                                                                                 const newWhatsapp = prompt('WhatsApp number:', seller.whatsapp)
                                                                                                                                                                                                                                                     const newLocation = prompt('Location:', seller.location)
 
-                                                                                                                                                                                                                                                        if (newName && newWhatsapp && newLocation) {
-                                                                                                                                                                                                                                                              const updatedSeller = {
-                                                                                                                                                                                                                                                                ...seller,
-                                                                                                                                                                                                                                                                  name: newName,
-                                                                                                                                                                                                                                                                    whatsapp: newWhatsapp,
-                                                                                                                                                                                                                                                                      location: newLocation,
-                                                                                                                                                                                                                                                                  }
-
-                                                                                                                                                                                                                                                                      const products = JSON.parse(
-                                                                                                                                                                                                                                                                    localStorage.getItem('sekayiProducts')
-                                                                                                                                                                                                                                                                    ) || []
-
-                                                                                                                                                                                                                                                                    const updatedProducts = products.map((product) => {
-                                                                                                                                                                                                                                                                      if (product.seller?.name === seller.name) {
-                                                                                                                                                                                                                                                                    return {
-                                                                                                                                                                                                                                                                          ...product,
-                                                                                                                                                                                                                                                                          seller: {
-                                                                                                                                                                                                                                                                            ...product.seller,
-                                                                                                                                                                                                                                                                              name: newName,
-                                                                                                                                                                                                                                                                                whatsapp: newWhatsapp,
-                                                                                                                                                                                                                                                                                  location: newLocation,
-                                                                                                                                                                                                                                                                                  },
-                                                                                                                                                                                                                                                                                      }
-                                                                                                                                                                                                                                                                                  }
-
-                                                                                                                                                                                                                                                                                    return product
-                                                                                                                                                                                                                                                                                    })
-
-                                                                                                                                                                                                                                                                                    localStorage.setItem(
-                                                                                                                                                                                                                                                                                      'sekayiProducts',
-                                                                                                                                                                                                                                                                                        JSON.stringify(updatedProducts)
-                                                                                                                                                                                                                                                                                        )
-                                                                                                                                                                                                                                                                      localStorage.setItem(
-                                                                                                                                                                                                                                                                        'sekayiSeller',
-                                                                                                                                                                                                                                                                          JSON.stringify(updatedSeller)
-                                                                                                                                                                                                                                                                          )
-
-                                                                                                                                                                                                                                                                                alert('Seller details updated successfully!')
-                                                                                                                                                                                                                                                                                window.location.reload()
+ if (newName && newWhatsapp && newLocation) {
+ marketplaceApi.updateSeller(seller.id, {
+   name: newName,
+   whatsapp: newWhatsapp,
+   location: newLocation,
+   product: seller.product
+ }).then((updatedSeller) => {
+   setSeller(updatedSeller)
+   localStorage.setItem('sekayiSeller', JSON.stringify(updatedSeller))
+   alert('Seller details updated successfully!')
+ }).catch((error) => alert(error.message))
                                                                                                                                                                                                                                                                               }
                                                                                                                                                                                                                                                                                                                                                   }}
                                                                                                                                                                                                                                                                                                                                                   >
@@ -556,23 +511,20 @@ const [productForm, setProductForm] = useState({
 
                                                                                                                                                                                                                                                   <p>
                                                                                                                                                                                                                                                                 <strong>Products:</strong>{' '}
-                                                                                                                                                                                                                                                                  {(JSON.parse(localStorage.getItem('sekayiProducts')) || [])
-                                                                                                                                                                                                                                                                      .filter((product) => product.seller?.name === seller.name)
+ {savedProducts
+ .filter((product) => product.sellerId === seller.id)
                                                                                                                                                                                                                                                                           .length}
                                                                                                                                                                                                                                                                             </p>
                                                                                                                                                                                                                                                                             <p>
-  <strong>Orders:</strong> 0
+ <strong>Orders:</strong> {sellerOrderCount}
 </p>
                                                                                                                       
                                                                                                                                                                                                                                                                             <h3>My Products</h3>
 
-                                                                                                                                                                                                                                                                            {(() => {
-                                                                                                                                                                                                                                                                              const myProducts =
-                                                                                                                                                                                                                                                                                  JSON.parse(localStorage.getItem('sekayiProducts')) || []
-
-                                                                                                                                                                                                                                                                                    const sellerProducts = myProducts.filter(
-                                                                                                                                                                                                                                                                                        (product) => product.seller?.name === seller.name
-                                                                                                                                                                                                                                                                                          )
+ {(() => {
+ const sellerProducts = savedProducts.filter(
+ (product) => product.sellerId === seller.id
+ )
 
                                                                                                                                                                                                                                                                                             return sellerProducts.length > 0 ? (
                                                                                                                                                                                                                                                                                                 sellerProducts.map((product) => (
@@ -617,22 +569,14 @@ const [productForm, setProductForm] = useState({
                                                                                                                                                                                                                                                                                                                                                                                 </button>
                                                                                                                                                                                                                                                                                                                               <button
                                                                                                                                                                                                                                                                                                                                   className="delete-product-button"
-                                                                                                                                                                                                                                                                                                                                      onClick={() => {
-                                                                                                                                                                                                                                                                                                                                            const products =
-                                                                                                                                                                                                                                                                                                                                                    JSON.parse(localStorage.getItem('sekayiProducts')) || []
-
-                                                                                                                                                                                                                                                                                                                                                          const updatedProducts = products.filter(
-                                                                                                                                                                                                                                                                                                                                                                  (item) => item.id !== product.id
-                                                                                                                                                                                                                                                                                                                                                                        )
-
-                                                                                                                                                                                                                                                                                                                                                                              localStorage.setItem(
-                                                                                                                                                                                                                                                                                                                                                                                      'sekayiProducts',
-                                                                                                                                                                                                                                                                                                                                                                                              JSON.stringify(updatedProducts)
-                                                                                                                                                                                                                                                                                                                                                                                                    )
-
-                                                                                                                                                                                                                                                                                                                                                                                                          setSavedProducts(updatedProducts)
-
-                                                                                                                                                                                                                                                                                                                                                                                                                alert('Product deleted.')
+ onClick={async () => {
+ try {
+   await marketplaceApi.deleteProduct(product.id)
+   setSavedProducts((items) => items.filter((item) => item.id !== product.id))
+   alert('Product deleted.')
+ } catch (error) {
+   alert(error.message)
+ }
                                                                                                                                                                                                                                                                                                                                                                                                                     }}
                                                                                                                                                                                                                                                                                                                                                                                                                       >
                                                                                                                                                                                                                                                                                                                                                                                                                           🗑️ Delete
@@ -651,8 +595,7 @@ const [productForm, setProductForm] = useState({
                                                                                                                                                                                                                                                                                                                                                 )
                                                                                                                                                                                                                                                                                                                                                 })()}
                                                                                                                                                                                                                                                                                       </div>
-                                                                                                                                                                                                                                                                                              )
-                                                                                                                                                                                                                                                                                                    })()}
+ )}
 <button
   className="register-button"
     onClick={() => setShowProductForm(true)}
@@ -776,7 +719,7 @@ const [productForm, setProductForm] = useState({
 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <button
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            className="register-button"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             onClick={() => {
+ onClick={async () => {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  if (
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        !productForm.name ||
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              !productForm.price ||
@@ -788,91 +731,61 @@ const [productForm, setProductForm] = useState({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                return
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    }
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       const savedSeller = localStorage.getItem('sekayiSeller')
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           if (!savedSeller) {
+ if (!seller?.id) {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  alert('Please register as a seller first.')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        return
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               const seller = JSON.parse(savedSeller)
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                if (editingProductId !== null) {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 const products =
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   JSON.parse(localStorage.getItem('sekayiProducts')) || []
+   try {
+     const updatedProduct = await marketplaceApi.updateProduct(editingProductId, {
+       name: productForm.name,
+       price: Number(String(productForm.price).replace(/[^0-9.]/g, '')),
+       category: productForm.category,
+       description: productForm.description,
+       details: productForm.location,
+       location: productForm.location,
+       image: productForm.image || '📦'
+     })
+     setSavedProducts((items) =>
+       items.map((item) => item.id === updatedProduct.id ? updatedProduct : item)
+     )
+     setEditingProductId(null)
+     alert('Product updated successfully!')
+   } catch (error) {
+     alert(error.message)
+     return
+   }
+ } else {
+   try {
+     const newProduct = await marketplaceApi.createProduct({
+       sellerId: seller.id,
+       name: productForm.name,
+       price: Number(String(productForm.price).replace(/[^0-9.]/g, '')),
+       category: productForm.category,
+       details: productForm.location,
+       description: productForm.description,
+       location: productForm.location,
+       image: productForm.image || '📦'
+     })
+     setSavedProducts((items) => [...items, newProduct])
+     alert('Product published successfully!')
+   } catch (error) {
+     alert(error.message)
+     return
+   }
+ }
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 const updatedProducts = products.map((product) =>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   product.id === editingProductId
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ? {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ...product,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         name: productForm.name,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         price: productForm.price,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         category: productForm.category,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         description: productForm.description,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         details: productForm.location
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     : product
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 )
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 localStorage.setItem(
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   'sekayiProducts',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   JSON.stringify(updatedProducts)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 )
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 setSavedProducts(updatedProducts)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 setEditingProductId(null)
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 alert('Product updated successfully!')
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 setProductForm({
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   name: '',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   price: '',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   category: '',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   description: '',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   location: '',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 })
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 setShowProductForm(false)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 return
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   const newProduct = {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         id: Date.now(),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               name: productForm.name,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     price: productForm.price,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           category: productForm.category,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 details: productForm.location,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       description: productForm.description,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             image: productForm.image || '📦',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   seller: {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           name: seller.name,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   location: seller.location,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           whatsapp: seller.whatsapp
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     }
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         const existingProducts =
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               JSON.parse(localStorage.getItem('sekayiProducts')) || []
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   localStorage.setItem(
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       'sekayiProducts',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               JSON.stringify([...existingProducts, newProduct])
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   )
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       alert('Product published successfully!')
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           setProductForm({
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 name: '',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       price: '',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             category: '',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   description: '',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         location: '',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             })
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 setShowProductForm(false)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     setShowSellerDashboard(false)
+ setProductForm({
+   name: '',
+   price: '',
+   category: '',
+   description: '',
+   location: '',
+   image: ''
+ })
+ setShowProductForm(false)
+ setShowSellerDashboard(false)
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        }}
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        >
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  Publish Product
@@ -918,22 +831,17 @@ const [productForm, setProductForm] = useState({
                 <p>{item.price}</p>
                 <div className="quantity-controls">
   <button
-    onClick={() => {
-      const updatedCart = cart
-        .map((cartItem) =>
-          cartItem.id === item.id
-            ? {
-                ...cartItem,
-                quantity: Math.max(1, cartItem.quantity - 1)
-              }
-            : cartItem
-        )
-
-      setCart(updatedCart)
-      localStorage.setItem(
-        'sekayiCart',
-        JSON.stringify(updatedCart)
-      )
+ onClick={async () => {
+ try {
+   const nextCart = await marketplaceApi.updateCartItem(
+     buyer.id,
+     item.id,
+     Math.max(1, item.quantity - 1)
+   )
+   setCart(cartItemsFromResponse(nextCart))
+ } catch (error) {
+   alert(error.message)
+ }
     }}
   >
     −
@@ -942,21 +850,17 @@ const [productForm, setProductForm] = useState({
   <span>{item.quantity}</span>
 
   <button
-    onClick={() => {
-      const updatedCart = cart.map((cartItem) =>
-        cartItem.id === item.id
-          ? {
-              ...cartItem,
-              quantity: cartItem.quantity + 1
-            }
-          : cartItem
-      )
-
-      setCart(updatedCart)
-      localStorage.setItem(
-        'sekayiCart',
-        JSON.stringify(updatedCart)
-      )
+ onClick={async () => {
+ try {
+   const nextCart = await marketplaceApi.updateCartItem(
+     buyer.id,
+     item.id,
+     item.quantity + 1
+   )
+   setCart(cartItemsFromResponse(nextCart))
+ } catch (error) {
+   alert(error.message)
+ }
     }}
   >
     +
@@ -964,16 +868,16 @@ const [productForm, setProductForm] = useState({
 </div>
 
                 <button
-                  onClick={() => {
-                    const updatedCart = cart.filter(
-                      (cartItem) => cartItem.id !== item.id
-                    )
-
-                    setCart(updatedCart)
-                    localStorage.setItem(
-                      'sekayiCart',
-                      JSON.stringify(updatedCart)
-                    )
+                  onClick={async () => {
+                    try {
+                      const nextCart = await marketplaceApi.removeCartItem(
+                        buyer.id,
+                        item.id
+                      )
+                      setCart(cartItemsFromResponse(nextCart))
+                    } catch (error) {
+                      alert(error.message)
+                    }
                   }}
                 >
                   Remove
@@ -1004,6 +908,28 @@ const [productForm, setProductForm] = useState({
 >
   🛵 Find a Rider
 </button>
+          <button
+            className="cart-button"
+            onClick={async () => {
+              if (!buyer?.id) {
+                alert('Please create a buyer account before placing an order.')
+                setShowAccount(true)
+                return
+              }
+              try {
+                const order = await marketplaceApi.createOrder(
+                  buyer.id,
+                  buyer.location
+                )
+                setCart([])
+                alert(`Order #${order.id} placed successfully!`)
+              } catch (error) {
+                alert(error.message)
+              }
+            }}
+          >
+            Place Order
+          </button>
         </>
       )}
 
@@ -1066,7 +992,7 @@ const [productForm, setProductForm] = useState({
 
           <button
             className="sell-button"
-            onClick={() => {
+            onClick={async () => {
               if (
                 !buyerForm.name ||
                 !buyerForm.whatsapp ||
@@ -1076,13 +1002,17 @@ const [productForm, setProductForm] = useState({
                 return
               }
 
-              localStorage.setItem(
-                'sekayiBuyer',
-                JSON.stringify(buyerForm)
-              )
-
-              setBuyer(buyerForm)
-              alert('Account created successfully!')
+              try {
+                const createdBuyer = await marketplaceApi.createBuyer(buyerForm)
+                localStorage.setItem(
+                  'sekayiBuyer',
+                  JSON.stringify(createdBuyer)
+                )
+                setBuyer(createdBuyer)
+                alert('Account created successfully!')
+              } catch (error) {
+                alert(error.message)
+              }
             }}
           >
             Create Account
